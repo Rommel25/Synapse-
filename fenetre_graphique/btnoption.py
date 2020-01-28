@@ -21,3 +21,6 @@ fenetre = Tk()
 fenetre.geometry("500x500")
 Button(fenetre, text="Règles du jeu", command=nouvelle_fenetre).pack()
 fenetre.mainloop()
+
+#Ouvre notre fenetre principale avec un bouton, quand on click
+#dessus cela ouvre les regles, il faudra changer la police etc...
