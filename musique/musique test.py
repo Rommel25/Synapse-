@@ -7,7 +7,7 @@ def play():
     pygame.mixer.music.play() #Playing It In The Whole Device
 Button(root,text="Play",command=play).pack()
 root.mainloop()
-#voir pour mettre la musique dès l'ouverture du jeu
+#pour mettre la musique on mettera un bouton du genre "voulez vous de la musique ?"
 #Quand la musique ce termine son état est 0
 #if musique == 1:
     #pygame.mixer.music.play()
