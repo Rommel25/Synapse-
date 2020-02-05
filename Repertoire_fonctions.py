@@ -1,3 +1,8 @@
+"""
+Fichier qui rencense toute les fonctions utilisées dans les différents fichier python du code
+Voire le fichier excel avec la liste des fonctions et variables pour avoir leur descritption
+"""
+
 def placement(objet, ligne, colonne, fusion_ligne = 1, fusion_colonne = 1):
     espace = 7
     objet.grid(row = ligne, column = colonne,
