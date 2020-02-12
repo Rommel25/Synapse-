@@ -12,10 +12,13 @@ def creation_objet(main_frame, type_objet, objet_a_creer = " "):
     elif type_objet == "image":
         objet = tkinter.Label(main_frame, image = objet_a_creer)
 
-    elif type_objet == "frame":
-        objet = tkinter.Frame(main_frame, width = l_jeu, height = h_jeu)
+        return objet
+    
+def creation_frame(main_frame, largeur, hauteur):
+    objet = tkinter.Frame(main_frame, width = largeur, height = hauteur)
     
     return objet
+
 
 def placement(objet, ligne, colonne, fusion_ligne = 1, fusion_colonne = 1):
     espace = 7
