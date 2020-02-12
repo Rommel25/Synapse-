@@ -17,3 +17,11 @@ def placement(objet, ligne, colonne, fusion_ligne = 1, fusion_colonne = 1):
     objet.grid(row = ligne, column = colonne,
                 rowspan = fusion_ligne, columnspan = fusion_colonne,
                 padx = espace, pady = espace)
+
+def creation_plateau():
+    global ligne_colonne
+    pas=0
+    inc=int(700/ligne_colonne)-1
+    for pas in range(2,700,inc):
+        plateau3.create_line(pas,2,pas,700)
+        plateau3.create_line(2,pas,700,pas)
