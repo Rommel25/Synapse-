@@ -2,13 +2,18 @@
 Fichier qui rencense toute les fonctions utilisées dans les différents fichier python du code
 Voire le fichier excel avec la liste des fonctions et variables pour avoir leur descritption
 """
-def creation_objet(main_frame, type_objet, objet_a_creer):
+def creation_objet(main_frame, type_objet, objet_a_creer = " "):
+    global l_jeu
+    global h_jeu
     if type_objet == "texte":
         objet = tkinter.Label(main_frame, text = objet_a_creer,
                                           font = ("Comic Sans MS", 16))
 
     elif type_objet == "image":
-            objet = tkinter.Label(main_frame, image = objet_a_creer)
+        objet = tkinter.Label(main_frame, image = objet_a_creer)
+
+    elif type_objet == "frame":
+        objet = tkinter.Frame(main_frame, width = l_jeu, height = h_jeu)
     
     return objet
 
