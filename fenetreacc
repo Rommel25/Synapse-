@@ -1,6 +1,6 @@
 from tkinter import *
 
-Text = ("helvetic", 10)
+Text = ("helvetic", 13)
 Texttitre = ("helvetic",25)
 fenetre = Tk()
 fenetre.geometry("854x580")
@@ -8,8 +8,8 @@ fenetre.geometry("854x580")
 
 def fenetre_jouer_menu():
     win = Toplevel()
-    message = "Synapse"
-    Label(win, text=message, font=Texttitre).pack()      #def de la fenetre n2
+    Titre2 = "Synapse"
+    Label(win, text=Titre2, font=Texttitre).pack()      #def de la fenetre n2
 
     Button(win,text="Quitter",command=win.destroy,font=Text).pack()
     win.geometry("854x580")
@@ -19,22 +19,13 @@ def fenetre_jouer_menu():
 
 
 
-
 def fenetre_principale():
-    titre1 = Label(fenetre,text="Synapse",font=Texttitre)
-    jouer = Button(fenetre, text="Jouer", command=fenetre_jouer_menu)
-    jouer.grid(row=1,column=1)
-    Quit = Button(fenetre,text="Quitter",command=fenetre.destroy, font=Text)
-    Quit.grid(row=2,column=2)
+    Titre1 = "Synapse"
+    Label(fenetre, text=Titre1, font=Texttitre).pack()
+    jouer = Button(fenetre, text="Jouer", command=fenetre_jouer_menu,font=Text,width=30,height=1).pack()
+    #mess = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    #Label(fenetre,text=mess,font=Texttitre).pack()
+    Quit = Button(fenetre,text="Quitter",command=fenetre.destroy, font=Text,width=30,height=1).pack()
     return fenetre_principale
 
 fenetre_principale()
-
-
-
-
-
-
-fenetre.mainloop()
-
-#fenetre n2 ne se superpose pas
