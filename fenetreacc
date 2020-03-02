@@ -2,6 +2,8 @@ from tkinter import *
 import pygame
 import webbrowser
 
+#Variables
+
 Text = ("Minecraft", 13)
 Texttitre = ("Minecraft", 40)
 fenetre = Tk()
@@ -12,7 +14,7 @@ url = "https://github.com/Rommel25/Synapse-"
 
 
 
-
+#Fenetre options et ses options
 
 def fenetre_options():
     root = Toplevel()
@@ -48,6 +50,7 @@ def fenetre_options():
 
 
 
+#fenetre d'accueil principale
 
 def fenetre_principale():
     Titre1 = "Synapse"
@@ -64,7 +67,7 @@ def fenetre_principale():
 
 
 
-
+#fenetre de la section jouer
 
 def fenetre_jouer_menu():
     win = Toplevel()
