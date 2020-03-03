@@ -1,5 +1,6 @@
 import tkinter as tk
-  
+
+###############################################################################
 #Variables
 l_jeu = 1280
 h_jeu = 720
@@ -7,10 +8,14 @@ res_jeu = str(l_jeu) + "x" + str(h_jeu)
 nom_fenetre = "SYNAPSE 2 Joueurs"
 nb_joueur = 2
 nb_cases = (nb_joueur*2)**2
-nb_pieces = int(nb_cases * 25 / 16)
+
+nb_pieces_restantes = int(nb_cases * 25 / 16)
 numero_tour = 0
 clic_valide = False
 gagnant = 0
+
+nom = ["Paul", "Anthony", "En2o"] #Liste qui contient le nom de chaque joueur
+score = [3, 5, 4] #Liste qui contient le score de chaque joueur
 
 #Ces variables permettent de placer les images des flèches et chiffres
 pad1 = 10
@@ -22,6 +27,7 @@ padB = int(h_jeu*7/10-pad2+50-0.5*c_img)
 padD = int(l_jeu-pad2-0.5*c_img)
 padG = int(l_jeu-2*pad2-2.5*c_img)
 
+###############################################################################
 #Fonctions
 def creation_fenetre_graphique(titre_fenetre, taille):
     win = tk.Tk()
@@ -63,18 +69,22 @@ def creation_plateau(canvas):
                            l_offset+632-(632//l_c)*i, h_offset+636,
                            width = 10-(nb_joueur-2)*2, fill = "#7A4330")
 
-def clic(event):
-    global padH
+def choix_valide_pieces(pieces_jouees):
+    global nb_pieces_restantes
+    if (nb_pieces_restantes - pieces_jouees) < 0:
+        choix = False
+        c.itemconfigure(instruction, text = "Choisissez moins de pièces !")
+
+    else:
+        choix = True
+
+    return choix
+
+def choix_nb_pieces(pos_X, pos_Y):
     global padH2
-    global padB
     global padD
     global padG
-    global nb_pieces
-    global numero_tour
     global clic_valide
-
-    X = event.x
-    Y = event.y
 
     intervalle_X_C1 = list(range(padG-55//2, padG+55//2))
     intervalle_Y_C1 = list(range(padH2-55//2, padH2+55//2))
@@ -83,39 +93,49 @@ def clic(event):
     intervalle_X_C3 = list(range(padD-55//2, padD+55//2))
     intervalle_Y_C3 = list(range(padH2-55//2, padH2+55//2))
 
+    if pos_X in intervalle_X_C1 and pos_Y in intervalle_Y_C1:
+        pieces = 1
+
+    elif pos_X in intervalle_X_C2 and pos_Y in intervalle_Y_C2:
+        pieces = 2
+
+    elif pos_X in intervalle_X_C3 and pos_Y in intervalle_Y_C3:
+        pieces = 3
+
+    clic_valide = choix_valide_pieces(pieces)
+
+    return pieces
+
+def clic(event):
+    global padH2
+    global padD
+    global padG
+    global nb_pieces_restantes
+    global numero_tour
+    global clic_valide
+
+    X = event.x
+    Y = event.y
+
+    intervalle_X_chiffre = list(range(padG-55//2, padD+55//2))
+    intervalle_Y_chiffre = list(range(padH2-55//2, padH2+55//2))
+
     #if grille est cliquée
     #c.itemconfigure(instruction, text = "Sélectionnez le nombre de pièce que vous voulez placer")
 
-    if X in intervalle_X_C1 and Y in intervalle_Y_C1:
-        if nb_pieces >=1:
-            numero_tour+=1
-            nb_pieces -= 1
-            clic_valide = True
-        elif nb_pieces < 0 :
-            clic_valide = False
-              
-    elif X in intervalle_X_C2 and Y in intervalle_Y_C2:
-        if nb_pieces >= 2:
-            numero_tour += 1
-            nb_pieces -= 2
-            clic_valide = True
-        elif nb_pieces > 0 :
-            c.itemconfigure(instruction, text = "Choisissez moins de pièces !")
-            clic_valide = False
-        
-    elif X in intervalle_X_C3 and Y in intervalle_Y_C3:
-        if nb_pieces >= 3:
-            numero_tour += 1
-            nb_pieces -= 3
-            clic_valide = True
-        elif nb_pieces > 0 :
-            c.itemconfigure(instruction, text = "Choisissez moins de pièces !")
-            clic_valide = False
 
-    c.itemconfigure(piece_restante, text = str(nb_pieces))
+
+    if X in intervalle_X_chiffre and Y in intervalle_Y_chiffre:
+        nb_pieces_jouees = choix_nb_pieces(X, Y)
+        if clic_valide:
+            nb_pieces_restantes -= nb_pieces_jouees
+
+    c.itemconfigure(piece_restante, text = str(nb_pieces_restantes))
     win.update()
 
 
+
+###############################################################################
 #Fenetre graphique
 win = creation_fenetre_graphique(nom_fenetre, res_jeu)
 c = tk.Canvas(win, width = l_jeu, height = h_jeu)
@@ -130,13 +150,16 @@ img_FD = import_image("Fleche_droite_1.png")
 img_FG = import_image("Fleche_gauche_1.png")
 img_chiffre = import_image("Chiffre_1.png") #Fond des chiffres du tableau de bord
 
+###############################################################################
+#Panneau de jeu central
 #Placement des images
 fond = creation_objet(c, "image", img_fond, l_jeu//2, h_jeu//2)
 plateau = creation_objet(c, "image", img_plateau, l_jeu//2, h_jeu//2)
 creation_plateau(c)
+###############################################################################
 
 ###############################################################################
-#Panneau de jeu gauche
+#Panneau de jeu droite
 #Instruction au joueur pour le tour actuel
 instruction = creation_objet(c, "texte", "Cliquez sur une des cases du plateau afin de placer vos pièces", (padG+padD)//2, 80)
 c.itemconfigure(instruction, justify = "center")
@@ -161,24 +184,39 @@ txt_piece_restante = creation_objet(c, "texte", "Nombre de pièces restantes :",
     (padG+padD)//2, 504 + 76)
 c.itemconfigure(txt_piece_restante, justify = "center")
 
-piece_restante = creation_objet(c, "texte", str(nb_pieces), 
+piece_restante = creation_objet(c, "texte", str(nb_pieces_restantes), 
     (padG+padD)//2, 504 + 66 + 90, 44)
 ###############################################################################
 
-while nb_pieces >= 0:
+###############################################################################
+#Panneau de jeu gauche
+for j in range (0,nb_joueur):
+    #nom.append("Joueur " + str(j+1))
+    creation_objet(c, "texte", str(nom[j]), 286//2, ((h_jeu*j)//nb_joueur)+30, 24)
+    creation_objet(c, "texte", "Parties gagnées : ", 286//2, ((h_jeu*j)//nb_joueur)+80, 16)
+    creation_objet(c, "texte", str(score[j]), 286//2, ((h_jeu*j)//nb_joueur)+150, 40)
+
+
+
+
+###############################################################################
+c.event_add("<<choix_pieces>>", "<Button-1>")
+
+while nb_pieces_restantes >= 0:
     if numero_tour%2 == 0 and numero_tour > 0 and clic_valide == True:
         c.itemconfigure(instruction, text = "Au tour du joueur 1")
 
     elif numero_tour > 0 and clic_valide == True:
         c.itemconfigure(instruction, text = "Au tour du joueur 2")
 
-    if nb_pieces <= 0:
+    if nb_pieces_restantes <= 0:
         #print("PLUS DE PIECE")
         gagnant = 1-numero_tour%2
+        c.event_delete("<<choix_pieces>>")
         break
     else:
         win.update()
-        c.bind("<Button-1>", clic)
+        c.bind("<<choix_pieces>>", clic)
 
 c.itemconfigure(instruction, text = "Fin de la partie")
 
