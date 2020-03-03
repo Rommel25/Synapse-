@@ -10,13 +10,12 @@ nb_joueur = 2
 nb_cases = (nb_joueur*2)**2
 
 nb_pieces_restantes = int(nb_cases * 25 / 16)
-numero_tour = 0
-clic_valide = False
+numero_tour = 1
 gagnant = 0
 
 nom = ["Paul", "Anthony", "En2o"] #Liste qui contient le nom de chaque joueur
 score = [3, 5, 4] #Liste qui contient le score de chaque joueur
-
+clic_valide = False
 #Ces variables permettent de placer les images des flèches et chiffres
 pad1 = 10
 pad2 = 40
@@ -106,13 +105,20 @@ def choix_nb_pieces(pos_X, pos_Y):
 
     return pieces
 
+def joueur_actuel(tour, total_joueur):
+    joueur_actu = numero_tour % total_joueur
+    if joueur_actu == 0:
+        joueur_actu = total_joueur
+
+    return joueur_actu
+
 def clic(event):
     global padH2
     global padD
     global padG
     global nb_pieces_restantes
     global numero_tour
-    global clic_valide
+
 
     X = event.x
     Y = event.y
@@ -123,15 +129,21 @@ def clic(event):
     #if grille est cliquée
     #c.itemconfigure(instruction, text = "Sélectionnez le nombre de pièce que vous voulez placer")
 
-
-
     if X in intervalle_X_chiffre and Y in intervalle_Y_chiffre:
         nb_pieces_jouees = choix_nb_pieces(X, Y)
-        if clic_valide:
-            nb_pieces_restantes -= nb_pieces_jouees
 
-    c.itemconfigure(piece_restante, text = str(nb_pieces_restantes))
+    #Si le choix du nombre et de l'orientation des pièces est valide, alors on met à jour les textes
+    if clic_valide:
+        numero_tour += 1
+        nb_pieces_restantes -= nb_pieces_jouees
+        joueur = joueur_actuel(numero_tour, nb_joueur)
+
+        c.itemconfigure(instruction, text = "Tour du joueur " + str(joueur))   
+        c.itemconfigure(piece_restante, text = str(nb_pieces_restantes))
+
     win.update()
+
+
 
 
 
@@ -202,21 +214,13 @@ for j in range (0,nb_joueur):
 ###############################################################################
 c.event_add("<<choix_pieces>>", "<Button-1>")
 
-while nb_pieces_restantes >= 0:
-    if numero_tour%2 == 0 and numero_tour > 0 and clic_valide == True:
-        c.itemconfigure(instruction, text = "Au tour du joueur 1")
 
-    elif numero_tour > 0 and clic_valide == True:
-        c.itemconfigure(instruction, text = "Au tour du joueur 2")
+while nb_pieces_restantes > 0:
+    win.update()
+    c.bind("<<choix_pieces>>", clic)
 
-    if nb_pieces_restantes <= 0:
-        #print("PLUS DE PIECE")
-        gagnant = 1-numero_tour%2
-        c.event_delete("<<choix_pieces>>")
-        break
-    else:
-        win.update()
-        c.bind("<<choix_pieces>>", clic)
+
+c.event_delete("<<choix_pieces>>")
 
 c.itemconfigure(instruction, text = "Fin de la partie")
 
