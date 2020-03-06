@@ -11,20 +11,22 @@ nb_cases = (nb_joueur*2)**2
 
 nb_pieces_restantes = int(nb_cases * 25 / 16)
 numero_tour = 1
-gagnant = 0
+gagnant = 0 #Numero de joueur du gagnant
 
-nom = ["Paul", "Anthony", "En2o"] #Liste qui contient le nom de chaque joueur
+nom = ["Paul", "Anthony", "Enzo"] #Liste qui contient le nom de chaque joueur
 score = [3, 5, 4] #Liste qui contient le score de chaque joueur
-clic_valide = False
-#Ces variables permettent de placer les images des flèches et chiffres
-pad1 = 10
-pad2 = 40
-c_img = 55
-padH = int(h_jeu*7/10-pad2+50-2*pad1-2.5*c_img)
-padH2 = int(padH-3*pad2)
-padB = int(h_jeu*7/10-pad2+50-0.5*c_img)
-padD = int(l_jeu-pad2-0.5*c_img)
-padG = int(l_jeu-2*pad2-2.5*c_img)
+clic_valide = False #Choix du joeur valide
+
+#Ces variables permettent de placer les images des fleches et chiffres
+pad1 = 10 #Petit espace entre les boutons
+pad2 = 40 #Grand espace entre les boutons
+c_img = 55 #Longeur des cotes des images des boutons
+padH = int(h_jeu*6/10-pad2+50-2*pad1-2.5*c_img) #Hauteur de la fleche du haut
+padB = int(h_jeu*6/10-pad2+50-0.5*c_img) #Hauteur de la fleche du bas
+padG = int(l_jeu-2*pad2-2.5*c_img) #Cote de la fleche gauche
+padD = int(l_jeu-pad2-0.5*c_img) #Cote de la fleche droite
+
+padH2 = int(padH-2*pad2) #Hauteur des chiffres
 
 ###############################################################################
 #Fonctions
@@ -56,8 +58,8 @@ def creation_objet(main_frame, type_objet, objet, x, y, taille = 18,
 def creation_plateau(canvas):
     global nb_joueur #Nombre de joueur qui jouent
     l_c = 2*nb_joueur #Nombre de lignes et de colonnes sur le plateau
-    l_offset = 286+36 #Largeur à partir du bord de la fenêtre
-    h_offset = 42 #Hauteur à partir du bord de la fenêtre
+    l_offset = 286+36 #Largeur à partir du bord de la fenetre
+    h_offset = 42 #Hauteur à partir du bord de la fenetre
     for i in range(1,l_c):
         #Création des lignes
         canvas.create_line(l_offset, h_offset+632-(632//l_c)*i,
@@ -92,6 +94,7 @@ def choix_nb_pieces(pos_X, pos_Y):
     intervalle_X_C3 = list(range(padD-55//2, padD+55//2))
     intervalle_Y_C3 = list(range(padH2-55//2, padH2+55//2))
 
+    pieces = 0
     if pos_X in intervalle_X_C1 and pos_Y in intervalle_Y_C1:
         pieces = 1
 
@@ -101,6 +104,7 @@ def choix_nb_pieces(pos_X, pos_Y):
     elif pos_X in intervalle_X_C3 and pos_Y in intervalle_Y_C3:
         pieces = 3
 
+    #A modifier pour generaliser la validation
     clic_valide = choix_valide_pieces(pieces)
 
     return pieces
@@ -108,9 +112,41 @@ def choix_nb_pieces(pos_X, pos_Y):
 def joueur_actuel(tour, total_joueur):
     joueur_actu = numero_tour % total_joueur
     if joueur_actu == 0:
-        joueur_actu = total_joueur
+    	joueur_actu = total_joueur
 
     return joueur_actu
+
+
+def choix_orientation_pieces(pos_X, pos_Y):
+    global padH
+    global padB
+    global padD
+    global padG
+    global clic_valide
+
+    intervalle_X_Haut = list(range((padD+padG-55)//2, (padD+padG+55)//2))
+    intervalle_Y_Haut = list(range(padH-55//2, padH+55//2))
+    intervalle_X_Bas = list(range((padD+padG-55)//2, (padD+padG+55)//2))
+    intervalle_Y_Bas = list(range(padB-55//2, padB+55//2))
+    intervalle_X_Gauche = list(range(padG-55//2, padG+55//2))
+    intervalle_Y_Gauche = list(range((padH+padB-55)//2, (padH+padB+55)//2))
+    intervalle_X_Droite = list(range(padD-55//2, padD+55//2))
+    intervalle_Y_Droite = list(range((padH+padB-55)//2, (padH+padB+55)//2))
+
+    orientation = "NON-DETERMINEE"
+    if pos_X in intervalle_X_Haut and pos_Y in intervalle_Y_Haut:
+        orientation = "Haut"
+
+    elif pos_X in intervalle_X_Bas and pos_Y in intervalle_Y_Bas:
+        orientation = "Bas"
+
+    elif pos_X in intervalle_X_Gauche and pos_Y in intervalle_Y_Gauche:
+        orientation = "Gauche"
+
+    elif pos_X in intervalle_X_Droite and pos_Y in intervalle_Y_Droite:
+        orientation = "Droite"
+
+    return orientation
 
 def clic(event):
     global padH2
@@ -119,20 +155,30 @@ def clic(event):
     global nb_pieces_restantes
     global numero_tour
 
-
     X = event.x
     Y = event.y
 
-    intervalle_X_chiffre = list(range(padG-55//2, padD+55//2))
-    intervalle_Y_chiffre = list(range(padH2-55//2, padH2+55//2))
-
-    #if grille est cliquée
+    print(X, Y)
+    #if grille est cliquee
     #c.itemconfigure(instruction, text = "Sélectionnez le nombre de pièce que vous voulez placer")
 
+    #Definition de l'intervalle dans laquelle le joueur choisi le nombre de pieces qu'il veut placer
+    intervalle_X_chiffre = list(range(padG-55//2, padD+55//2))
+    intervalle_Y_chiffre = list(range(padH2-55//2, padH2+55//2))
     if X in intervalle_X_chiffre and Y in intervalle_Y_chiffre:
         nb_pieces_jouees = choix_nb_pieces(X, Y)
 
-    #Si le choix du nombre et de l'orientation des pièces est valide, alors on met à jour les textes
+    #Definition de l'intervalle dans laquelle le joueur choisi l'orientation des pieces qu'il veut placer
+    intervalle_X_orientation = list(range(padG-55//2, padD+55//2))
+    intervalle_Y_orientation = list(range(padH-55//2, padB+55//2))
+
+    #print(intervalle_X_orientation)
+    #print(intervalle_Y_orientation)
+
+    if X in intervalle_X_orientation and Y in intervalle_Y_orientation:
+        orientation_pieces = choix_orientation_pieces(X, Y)
+
+    #Si le choix du nombre et de l'orientation des pieces est valide, alors on met à jour les textes et la fenêtre
     if clic_valide:
         numero_tour += 1
         nb_pieces_restantes -= nb_pieces_jouees
@@ -207,8 +253,6 @@ for j in range (0,nb_joueur):
     creation_objet(c, "texte", str(nom[j]), 286//2, ((h_jeu*j)//nb_joueur)+30, 24)
     creation_objet(c, "texte", "Parties gagnées : ", 286//2, ((h_jeu*j)//nb_joueur)+80, 16)
     creation_objet(c, "texte", str(score[j]), 286//2, ((h_jeu*j)//nb_joueur)+150, 40)
-
-
 
 
 ###############################################################################
