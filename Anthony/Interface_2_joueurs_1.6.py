@@ -16,6 +16,7 @@ gagnant = 0 #Numero de joueur du gagnant
 nom = ["Paul", "Anthony", "Enzo"] #Liste qui contient le nom de chaque joueur
 score = [3, 5, 4] #Liste qui contient le score de chaque joueur
 tour_valide = False #Tour du joeur valide
+nb_clic = 0
 
 #Ces variables permettent de placer les images des fleches et chiffres
 pad1 = 10 #Petit espace entre les boutons
@@ -149,7 +150,9 @@ def verification(pieces_jouees, orientation):
     if (nb_pieces_restantes - pieces_jouees) < 0:
         choix = False
         c.itemconfigure(instruction, text = "Choisissez moins de pièces !")
-
+    elif pieces_jouees == 0:
+        choix = False
+        c.itemconfigure(instruction, text = "Choisissez un nombre de pièces !")
     else:
         choix = True
 
@@ -164,9 +167,11 @@ def clic(event):
     global nb_pieces_restantes
     global numero_tour
     global tour_valide
+    global nb_clic
 
     X = event.x
     Y = event.y
+    nb_clic += 1
 
     #if grille est cliquee
     #c.itemconfigure(instruction, text = "Sélectionnez le nombre de pièce que vous voulez placer")
@@ -174,10 +179,8 @@ def clic(event):
     #Definition de l'intervalle dans laquelle le joueur choisi le nombre de pieces qu'il veut placer
     intervalle_X_chiffre = list(range(padG-55//2, padD+55//2))
     intervalle_Y_chiffre = list(range(padH2-55//2, padH2+55//2))
-    nb_pieces_jouees = 0
     if X in intervalle_X_chiffre and Y in intervalle_Y_chiffre:
         nb_pieces_jouees = choix_nb_pieces(X, Y)
-        tour_valide = True
 
     #Definition de l'intervalle dans laquelle le joueur choisi l'orientation des pieces qu'il veut placer
     intervalle_X_orientation = list(range(padG-55//2, padD+55//2))
@@ -185,13 +188,12 @@ def clic(event):
     orientation_pieces = "NON-DETERMINEE"
     if X in intervalle_X_orientation and Y in intervalle_Y_orientation:
         orientation_pieces = choix_orientation_pieces(X, Y)
-        tour_valide = True
 
     #Definition de l'intervalle dans laquelle le joueur valide son tour
     intervalle_X_validation = list(range(padG-55//2, padD+55//2))
     intervalle_Y_validation = list(range(padB2-55//2, padB2+55//2))
     if X in intervalle_X_validation and Y in intervalle_Y_validation:
-        if numero_tour == 1:
+        if numero_tour == 1 and nb_clic == 1:
             c.event_delete("<<choix_pieces>>")
             win.destroy()
         else:
@@ -205,6 +207,7 @@ def clic(event):
 
         c.itemconfigure(instruction, text = "Tour du joueur " + str(joueur))   
         c.itemconfigure(piece_restante, text = str(nb_pieces_restantes))
+        nb_pieces_jouees = 0
 
     win.update()
 
