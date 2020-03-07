@@ -1,22 +1,12 @@
-import tkinter, time
+import tkinter
 
-def temps():
-  global tps0
-  heure=time.strftime("%Y.%m.%d - %H:%M:%S")
-  texte0.config(text=heure)
-  tps0=racine0.after(2000, temps)
-
-def stop():
-  global tps0
-  racine0.after_cancel(tps0)
+def touche(evt0):
+  texte0.config(text=evt0.char)
 
 racine0=tkinter.Tk()
 
-texte0=tkinter.Label(racine0, text="")
+texte0=tkinter.Label(racine0, text="...", font="Arial 64", width=3)
 texte0.pack()
-
-bouton0=tkinter.Button(racine0, text="Stop", command=stop)
-bouton0.pack()
-temps()
+racine0.bind("<KeyRelease>", touche)
 
 racine0.mainloop()
