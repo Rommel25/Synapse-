@@ -240,6 +240,7 @@ def clic(event):
 
     X = event.x
     Y = event.y
+    lettre = event.char
 
     #Interrvalle dans laquelle le joueur peut cliquer sur le plateau
     intervalle_X_plateau = list(range(l_offset, l_offset+632))
@@ -263,7 +264,6 @@ def clic(event):
 
     if X in intervalle_X_plateau and Y in intervalle_Y_plateau:
         #localisation_grille(X, Y)
-
         c.itemconfigure(instruction, text = "Sélectionnez le nombre ou l'orientation des pièces")
 
     if X in intervalle_X_chiffre and Y in intervalle_Y_chiffre:
@@ -278,7 +278,11 @@ def clic(event):
     if X in intervalle_X_quitter and Y in intervalle_Y_quitter:
         win.destroy()
 
-    #print(nb_pieces_jouees, orientation_pieces, tour_valide)
+    if lettre == "q":
+        win.destroy()
+
+
+    print(nb_pieces_jouees, orientation_pieces, tour_valide)
     #Si le choix du nombre et de l'orientation des pieces est valide, alors on met à jour les textes et la fenêtre
     if tour_valide:
         numero_tour += 1
@@ -312,6 +316,7 @@ def quit(event):
 
     intervalle_X_validation = list(range(padG-55//2, padD+55//2))
     intervalle_Y_validation = list(range(padB2-55//2, padB2+55//2))
+    
     if X in intervalle_X_validation and Y in intervalle_Y_validation:
         c.event_delete("<<Quitter>>", "<Button-1>", "<KeyRelease-q>")
         c.itemconfigure(fond_gagnant, state = "hidden")
@@ -319,11 +324,9 @@ def quit(event):
         partie_en_cours()
 
     if X in intervalle_X_quitter and Y in intervalle_Y_quitter:
-        print("Quitter")
         win.destroy()
 
     if letter == "q":
-        print("Quitter")
         win.destroy()
 
 
@@ -361,7 +364,8 @@ def partie_en_cours():
     c.itemconfigure(piece_restante, text = str(nb_pieces_restantes))
 
     win.event_add("<<Fin_partie>>", "<KeyRelease-f>")
-    c.event_add("<<choix_pieces>>", "<Button-1>")
+    c.event_add("<<choix_pieces>>", "<Button-1>", "<KeyRelease-q>")
+    c.focus_force()
 
     while nb_pieces_restantes > 0:
         c.bind("<<choix_pieces>>", clic)
