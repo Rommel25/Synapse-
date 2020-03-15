@@ -7,8 +7,12 @@ h_jeu = 720
 res_jeu = str(l_jeu) + "x" + str(h_jeu)
 nom_fenetre = "SYNAPSE 2 Joueurs"
 nb_joueur = 2 #Nombre de joueur qui jouent
-nb_cases = (nb_joueur*2)**2
+l_c = 2*nb_joueur #Nombre de lignes et de colonnes sur le plateau
+nb_cases = l_c**2
+
 grille_de_jeu = [] #Grille qui sauvegarde les informations du plateau
+liste_piece = [] #Liste qui stocke les pièces
+img_choix = [] #Liste qui stocke les images des pièces
 
 nb_pieces_restantes = int(nb_cases * 25 / 16)
 numero_tour = 1
@@ -17,6 +21,10 @@ gagnant = 0 #Numero de joueur du gagnant
 nom = ["Paul", "Anthony", "Enzo"] #Liste qui contient le nom de chaque joueur
 score = [3, 5, 4] #Liste qui contient le score de chaque joueur
 
+ligne = 0 #Ligne actuelle de la sélection du plateau
+colonne = 0 #Colonne actuelle de la sélection du plateau
+axe_X = 0
+axe_Y = 0
 nb_pieces_jouees = 0 #Nombre de pieces jouees
 orientation_pieces = "NON-DETERMINEE" #Orientation de la piece jouees
 tour_valide = False #Tour du joeur valide
@@ -53,6 +61,13 @@ def reinitialisation_variables():
     nb_pieces_jouees = 0 #Nombre de pieces jouees
     orientation_pieces = "NON-DETERMINEE" #Orientation de la piece jouees
     tour_valide = False #Tour du joeur valide
+
+    grille_de_jeu = [] #Grille qui sauvegarde les informations du plateau
+    liste_piece = [] #Liste qui stock les pièces
+    ligne = 0 #Ligne actuelle de la sélection du plateau
+    colonne = 0 #Colonne actuelle de la sélection du plateau
+    axe_X = 0
+    axe_Y = 0
 
 
 def creation_fenetre_graphique(titre_fenetre, taille):
@@ -94,8 +109,9 @@ def creation_plateau(canvas):
     global grille_de_jeu
     global l_offset
     global h_offset
+    global l_c
 
-    l_c = 2*nb_joueur #Nombre de lignes et de colonnes sur le plateau
+
     for i in range(1,l_c):
         #Création des lignes
         canvas.create_line(l_offset, h_offset+632-(632//l_c)*i,
@@ -116,6 +132,20 @@ def affichage_joueur(nb_joueur, nom_joueur, score_joueur):
         creation_objet(c, "texte", str(nom_joueur[j]), 286//2, ((h_jeu*j)//nb_joueur)+30, 24)
         creation_objet(c, "texte", "Parties gagnées : ", 286//2, ((h_jeu*j)//nb_joueur)+80, 16)
         c.itemconfigure(txt_score[j], text = str(score_joueur[j]))
+
+
+
+def localisation_grille(pos_X, pos_Y):
+    global nb_joueur
+    global l_offset
+    global h_offset
+    global l_c
+
+    lin = (pos_Y // (632//l_c))
+    col = ((pos_X-l_offset) // (632//l_c))
+    print("Position clic X : ", pos_X, ", Position clic Y : ", pos_Y)
+
+    return lin, col
 
 def choix_nb_pieces(pos_X, pos_Y):
     global padH2
@@ -165,16 +195,24 @@ def choix_orientation_pieces(pos_X, pos_Y):
 
     orientation = "NON-DETERMINEE"
     if pos_X in intervalle_X_Haut and pos_Y in intervalle_Y_Haut:
-        orientation = "Haut"
+        orientation = "H"
+        axe_X = 0
+        axe_Y = -1
 
     elif pos_X in intervalle_X_Bas and pos_Y in intervalle_Y_Bas:
-        orientation = "Bas"
+        orientation = "B"
+        axe_X = 0
+        axe_Y = 1
 
     elif pos_X in intervalle_X_Gauche and pos_Y in intervalle_Y_Gauche:
-        orientation = "Gauche"
+        orientation = "G"
+        axe_X = -1
+        axe_Y = 0
 
     elif pos_X in intervalle_X_Droite and pos_Y in intervalle_Y_Droite:
-        orientation = "Droite"
+        orientation = "D"
+        axe_X = 1
+        axe_Y = 0
 
     if nb_pieces_jouees == 0:
         c.itemconfigure(instruction, text = "Sélectionnez le nombre de pièce à placer")
@@ -182,12 +220,12 @@ def choix_orientation_pieces(pos_X, pos_Y):
         c.itemconfigure(instruction, text = "Validez le tour")
 
 
-    return orientation
+    return orientation, axe_X, axe_Y
 
 def verification_nb_pieces(pieces_jouees):
     global nb_pieces_restantes
 
-    if (nb_pieces_restantes - pieces_jouees) < 0:
+    if nb_pieces_restantes < pieces_jouees:
         choix = False
         c.itemconfigure(instruction, text = "Choisissez moins de pièces !")
     elif pieces_jouees == 0:
@@ -207,18 +245,28 @@ def verification_orientation(orientation):
 
     return choix
 
-def verification_plateau(pieces_jouees, orientation):
+def verification_plateau(ligne, colonne):
+    global l_c
+    global grille_de_jeu
     #Verification par rapport à la grille du plateau
-
-    #else:
-    choix = True
+    if (ligne + 1) > l_c or (ligne) < 0:
+        choix = False
+        c.itemconfigure(instruction, text = "Votre choix n'est pas valide, les pièces seraient en dehors du plateau !")
+    elif (colonne + 1) > l_c or (colonne) < 0:
+        choix = False
+        c.itemconfigure(instruction, text = "Votre choix n'est pas valide, les pièces seraient en dehors du plateau !")
+    elif grille_de_jeu[ligne][colonne] != '-':
+        choix = False
+        c.itemconfigure(instruction, text = "Votre choix n'est pas valide, les pièces se chevauchent !")
+    else:
+        choix = True
 
     return choix
 
-def verification(pieces_jouees, orientation):
+def verification(pieces_jouees, orientation, ligne, colonne):
     choix_orientation = verification_orientation(orientation)
     choix_nb_pieces = verification_nb_pieces(pieces_jouees)
-    choix_plateau = verification_plateau(pieces_jouees, orientation)
+    choix_plateau = verification_plateau(ligne, colonne)
 
     if choix_nb_pieces and choix_orientation and choix_plateau:
         choix = True    
@@ -233,10 +281,15 @@ def clic(event):
     global numero_tour
     global nb_pieces_jouees
     global orientation_pieces
+    global ligne
+    global colonne
     global tour_valide
     global grille_de_jeu
     global numero_joueur
     global joueur
+    global axe_X
+    global axe_Y
+    global img_piece
 
     X = event.x
     Y = event.y
@@ -262,19 +315,25 @@ def clic(event):
     intervalle_X_quitter = list(range((140-116)//2, (140+116)//2))
     intervalle_Y_quitter = list(range(h_jeu-(50+35)//2, h_jeu-(50-35)//2))
 
-    if X in intervalle_X_plateau and Y in intervalle_Y_plateau:
-        #localisation_grille(X, Y)
+    if X in intervalle_X_plateau and Y in intervalle_Y_plateau and numero_tour == 1:
+        (ligne, colonne) = localisation_grille(X, Y)
+        print("Ligne : ", ligne, ", Colonne : ", colonne)
         c.itemconfigure(instruction, text = "Sélectionnez le nombre ou l'orientation des pièces")
 
     if X in intervalle_X_chiffre and Y in intervalle_Y_chiffre:
         nb_pieces_jouees = choix_nb_pieces(X, Y)
+        #print("Nombre jouée : ", nb_pieces_jouees)
 
     if X in intervalle_X_orientation and Y in intervalle_Y_orientation:
-        orientation_pieces = choix_orientation_pieces(X, Y)
+        (orientation_pieces, axe_X, axe_Y) = choix_orientation_pieces(X, Y)
+        #print("Orientation X : ", axe_X, ", Orientation Y : ", axe_Y)
     
     if X in intervalle_X_validation and Y in intervalle_Y_validation:
-        tour_valide = verification(nb_pieces_jouees, orientation_pieces)
-
+        ligne_suiv = ligne + nb_pieces_jouees * axe_Y
+        colonne_suiv = colonne + nb_pieces_jouees * axe_X
+        #print("Prochaine ligne : ", ligne_suiv,", Prochaine colonne : ",  colonne_suiv)
+        tour_valide = verification(nb_pieces_jouees, orientation_pieces, ligne_suiv, colonne_suiv)
+        
     if X in intervalle_X_quitter and Y in intervalle_Y_quitter:
         win.destroy()
 
@@ -282,12 +341,18 @@ def clic(event):
         win.destroy()
 
 
-    print(nb_pieces_jouees, orientation_pieces, tour_valide)
-    #Si le choix du nombre et de l'orientation des pieces est valide, alors on met à jour les textes et la fenêtre
+    #print(nb_pieces_jouees, orientation_pieces, tour_valide)
+
+    #Si le choix du nombre et de l'orientation des pieces par rapport au plateau est valide, alors on met à jour les textes et la fenêtre
     if tour_valide:
         numero_tour += 1
         nb_pieces_restantes -= nb_pieces_jouees
         (numero_joueur, joueur) = joueur_actuel(numero_tour, nb_joueur)
+
+        img_piece = import_image("Piece_" + str(nb_pieces_jouees) + orientation_pieces + ".png")
+        mise_a_jour_grille(img_piece)
+
+        grille_de_jeu [ligne][colonne] = str(nb_pieces_jouees*orientation_pieces)
         for i in range(2*nb_joueur):
             print(grille_de_jeu[i])
 
@@ -298,9 +363,56 @@ def clic(event):
         nb_pieces_jouees = 0 #Nombre de pieces jouees
         orientation_pieces = "NON-DETERMINEE" #Orientation de la piece jouees
         tour_valide = False #Tour du joeur valide
+        ligne = ligne_suiv
+        colonne = colonne_suiv
 
 
     win.update()
+
+"""
+    if orientation_pieces == "H":
+        if nb_pieces_jouees == 1:
+            pieces = img_1H
+
+        elif nb_pieces_jouees == 2:
+            pieces = img_1H
+
+        else:
+            pieces = img_1H
+
+
+    elif orientation_pieces == "B":
+
+
+    elif orientation_pieces == "D":
+
+
+    else:
+"""
+
+
+
+def mise_a_jour_grille(img):
+    global nb_pieces_jouees
+    global orientation_pieces
+    global ligne
+    global colonne
+    global numero_tour
+    global liste_piece
+    global l_offset
+    global h_offset
+    global l_c
+ 
+    pos_X = l_offset + int((632//l_c)*(colonne+1/2))
+    pos_Y = h_offset + int((632//l_c)*(ligne+1/2))
+
+    #print("Position piece X : ", pos_X, ", Position piece Y : ", pos_Y)
+
+    #PROBLEME : l'image disparaît des qu'on joue le tour d'apres
+
+    image = creation_objet(c, "image", img, pos_X, pos_Y)
+    c.itemconfigure(image, state = "normal")
+
 
 def quit(event):
     global fond_gagnant
@@ -417,6 +529,21 @@ img_chiffre = import_image("Chiffre_1.png") #Fond des chiffres du tableau de bor
 img_validation = import_image("Fond_validation.png")
 img_quitter = import_image("Fond_quitter.png")
 
+
+#Importation des pieces
+img_1H = import_image("Piece_1H.png")
+img_2H = import_image("Piece_2H.png")
+img_3H = import_image("Piece_3H.png")
+img_1B = import_image("Piece_1B.png")
+img_2B = import_image("Piece_2B.png")
+img_3B = import_image("Piece_3B.png")
+img_1D = import_image("Piece_1D.png")
+img_2D = import_image("Piece_2D.png")
+img_3D = import_image("Piece_3D.png")
+img_1G = import_image("Piece_1G.png")
+img_2G = import_image("Piece_2G.png")
+img_3G = import_image("Piece_3G.png")
+
 ###############################################################################
 #Panneau de jeu central
 #Placement des images
@@ -424,13 +551,13 @@ fond = creation_objet(c, "image", img_fond, l_jeu//2, h_jeu//2)
 plateau = creation_objet(c, "image", img_plateau, l_jeu//2, h_jeu//2)
 creation_plateau(c)
 
-fond_gagnant = c.create_rectangle(280,720//4, l_jeu-280, 3*720//4, fill = "lightgrey", outline = "red3", width = 10)
-c.itemconfigure(fond_gagnant, state = "hidden")
+fond_gagnant = c.create_rectangle(280,720//4, l_jeu-280, 3*720//4, fill = "lightgrey", outline = "red3", width = 10, state = "hidden")
 
 message = creation_objet(c, "texte", "Le gagnant de la partie est " + str(gagnant),
         l_jeu//2, h_jeu//2, 50, "red3")
-c.itemconfigure(message, justify = "center", width = 700)
-c.itemconfigure(message, state = "hidden")
+c.itemconfigure(message, justify = "center", width = 700, state = "hidden")
+
+
 ###############################################################################
 
 ###############################################################################
@@ -477,7 +604,8 @@ piece_restante = creation_objet(c, "texte", str(nb_pieces_restantes),
 #Panneau de jeu gauche
 txt_score = []
 for j in range(nb_joueur):
-    txt_score.append(creation_objet(c, "texte", str(score[j]), 286//2, ((h_jeu*j)//nb_joueur)+150, 40))
+    texte = creation_objet(c, "texte", str(score[j]), 286//2, ((h_jeu*j)//nb_joueur)+150, 40)
+    txt_score.append(texte)
 
 affichage_joueur(nb_joueur, nom, score)
 
