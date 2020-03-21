@@ -11,8 +11,8 @@ l_c = 2*nb_joueur #Nombre de lignes et de colonnes sur le plateau
 nb_cases = l_c**2
 
 grille_de_jeu = [] #Grille qui sauvegarde les informations du plateau
-liste_piece = [] #Liste qui stocke les pièces
-img_choix = [] #Liste qui stocke les images des pièces
+liste_piece = [] #Liste qui stocke les pieces
+liste_image_piece = [] #Liste qui stocke les nom des images des pieces
 
 nb_pieces_restantes = int(nb_cases * 25 / 16)
 numero_tour = 1
@@ -28,6 +28,7 @@ axe_Y = 0
 nb_pieces_jouees = 0 #Nombre de pieces jouees
 orientation_pieces = "NON-DETERMINEE" #Orientation de la piece jouees
 tour_valide = False #Tour du joeur valide
+espace_vide = nb_cases
 
 l_offset = 286+36 #Largeur entre le bord de la fenetre et le plateau
 h_offset = 42 #Hauteur entre le bord de la fenetre et le plateau
@@ -53,6 +54,14 @@ def reinitialisation_variables():
     global nb_pieces_jouees
     global orientation_pieces
     global tour_valide
+    global espace_vide
+    global grille_de_jeu
+    global liste_piece
+    global liste_image_piece
+    global ligne
+    global colonne
+    global axe_X
+    global axe_Y
 
     nb_pieces_restantes = int(nb_cases * 25 / 16)
     numero_tour = 1
@@ -61,9 +70,11 @@ def reinitialisation_variables():
     nb_pieces_jouees = 0 #Nombre de pieces jouees
     orientation_pieces = "NON-DETERMINEE" #Orientation de la piece jouees
     tour_valide = False #Tour du joeur valide
+    espace_vide = nb_cases
 
     grille_de_jeu = [] #Grille qui sauvegarde les informations du plateau
-    liste_piece = [] #Liste qui stock les pièces
+    liste_piece = [] #Liste qui stocke les pièces
+    liste_image_piece = [] #Liste qui stocke les nom des images des pieces
     ligne = 0 #Ligne actuelle de la sélection du plateau
     colonne = 0 #Colonne actuelle de la sélection du plateau
     axe_X = 0
@@ -121,8 +132,6 @@ def creation_plateau(canvas):
         canvas.create_line(l_offset+632-(632//l_c)*i, h_offset,
                            l_offset+632-(632//l_c)*i, h_offset+636,
                            width = 10-(nb_joueur-2)*2, fill = "#7A4330")
-    #Creation de la matrice qui va sauvegarder toutes informations du plateau
-    grille_de_jeu = matrice(l_c)
 
 def affichage_joueur(nb_joueur, nom_joueur, score_joueur):
     global txt_score
@@ -143,7 +152,6 @@ def localisation_grille(pos_X, pos_Y):
 
     lin = (pos_Y // (632//l_c))
     col = ((pos_X-l_offset) // (632//l_c))
-    print("Position clic X : ", pos_X, ", Position clic Y : ", pos_Y)
 
     return lin, col
 
@@ -280,6 +288,8 @@ def clic(event):
     global nb_pieces_restantes
     global numero_tour
     global nb_pieces_jouees
+    global espace_vide
+    global l_c
     global orientation_pieces
     global ligne
     global colonne
@@ -289,11 +299,12 @@ def clic(event):
     global joueur
     global axe_X
     global axe_Y
-    global img_piece
+    global liste_image_piece
 
     X = event.x
     Y = event.y
     lettre = event.char
+    #print("Position clic X : ", X, ", Position clic Y : ", Y)
 
     #Interrvalle dans laquelle le joueur peut cliquer sur le plateau
     intervalle_X_plateau = list(range(l_offset, l_offset+632))
@@ -317,7 +328,7 @@ def clic(event):
 
     if X in intervalle_X_plateau and Y in intervalle_Y_plateau and numero_tour == 1:
         (ligne, colonne) = localisation_grille(X, Y)
-        print("Ligne : ", ligne, ", Colonne : ", colonne)
+        #print("Ligne : ", ligne, ", Colonne : ", colonne)
         c.itemconfigure(instruction, text = "Sélectionnez le nombre ou l'orientation des pièces")
 
     if X in intervalle_X_chiffre and Y in intervalle_Y_chiffre:
@@ -347,12 +358,15 @@ def clic(event):
     if tour_valide:
         numero_tour += 1
         nb_pieces_restantes -= nb_pieces_jouees
+        espace_vide -= 1
         (numero_joueur, joueur) = joueur_actuel(numero_tour, nb_joueur)
 
-        img_piece = import_image("Piece_" + str(nb_pieces_jouees) + orientation_pieces + ".png")
-        mise_a_jour_grille(img_piece)
+
+        liste_image_piece.append(import_image("Piece_" + str(nb_pieces_jouees) + orientation_pieces + ".png"))
+        mise_a_jour_grille()
 
         grille_de_jeu [ligne][colonne] = str(nb_pieces_jouees*orientation_pieces)
+        print("Tour : ", numero_tour-1)
         for i in range(2*nb_joueur):
             print(grille_de_jeu[i])
 
@@ -369,36 +383,14 @@ def clic(event):
 
     win.update()
 
-"""
-    if orientation_pieces == "H":
-        if nb_pieces_jouees == 1:
-            pieces = img_1H
-
-        elif nb_pieces_jouees == 2:
-            pieces = img_1H
-
-        else:
-            pieces = img_1H
-
-
-    elif orientation_pieces == "B":
-
-
-    elif orientation_pieces == "D":
-
-
-    else:
-"""
-
-
-
-def mise_a_jour_grille(img):
+def mise_a_jour_grille():
     global nb_pieces_jouees
     global orientation_pieces
     global ligne
     global colonne
     global numero_tour
     global liste_piece
+    global liste_image_piece
     global l_offset
     global h_offset
     global l_c
@@ -407,11 +399,10 @@ def mise_a_jour_grille(img):
     pos_Y = h_offset + int((632//l_c)*(ligne+1/2))
 
     #print("Position piece X : ", pos_X, ", Position piece Y : ", pos_Y)
+    #print(liste_image_piece[numero_tour-2])
 
-    #PROBLEME : l'image disparaît des qu'on joue le tour d'apres
-
-    image = creation_objet(c, "image", img, pos_X, pos_Y)
-    c.itemconfigure(image, state = "normal")
+    image = creation_objet(c, "image", liste_image_piece[numero_tour-2], pos_X, pos_Y)
+    liste_piece.append(image)
 
 
 def quit(event):
@@ -462,12 +453,22 @@ def joueur_actuel(tour, total_joueur):
 
 
 def partie_en_cours():
+    global matrice
+    global l_c
+    global grille_de_jeu
     global numero_tour
     global nb_joueur
     global joueur
     global nb_pieces_restantes
+    global espace_vide
 
+    prnt("")
+    print("##################################################################")
+    print("NOUVELLE PARTIE")
+    print("")
     reinitialisation_variables()
+    #Creation de la matrice qui va sauvegarder toutes informations du plateau
+    grille_de_jeu = matrice(l_c)
     (numero_joueur, joueur) = joueur_actuel(numero_tour, nb_joueur)
 
     c.itemconfigure(tour_joueur, text = "Tour de " + str(joueur))
@@ -479,7 +480,7 @@ def partie_en_cours():
     c.event_add("<<choix_pieces>>", "<Button-1>", "<KeyRelease-q>")
     c.focus_force()
 
-    while nb_pieces_restantes > 0:
+    while nb_pieces_restantes > 0 and espace_vide > 1:
         c.bind("<<choix_pieces>>", clic)
         win.bind("<<Fin_partie>>", fin)
         win.update()
@@ -494,6 +495,8 @@ def fin_partie():
     global score
     global fond_gagnant
     global message
+    global liste_piece
+    global liste_image_piece
 
     c.event_add("<<Quitter>>", "<Button-1>", "<KeyRelease-q>")
     c.bind("<<Quitter>>", quit)
@@ -502,13 +505,18 @@ def fin_partie():
     c.itemconfigure(instruction, text = "Cliquez sur le bouton de validation pour continuer à jouer ou sur quitter pour arrêter ")
     c.itemconfigure(validation, text = "Recommencer", font = ("Minecraft", 16))
 
-    c.itemconfigure(fond_gagnant, state = "normal")
+    #print(liste_piece, liste_image_piece)
+    del(liste_piece)
+    del(liste_image_piece)
+
 
     numero_tour += 1
     (numero_gagnant, gagnant) = joueur_actuel(numero_tour, nb_joueur)
     score[numero_gagnant-1] += 1
 
     affichage_joueur(nb_joueur, nom, score)
+
+    c.itemconfigure(fond_gagnant, state = "normal")
     c.itemconfigure(message, text = "Le gagnant de la partie est " + str(gagnant), state = "normal")
    
 
