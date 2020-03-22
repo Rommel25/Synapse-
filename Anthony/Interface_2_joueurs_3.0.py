@@ -256,6 +256,8 @@ def verification_orientation(orientation):
 def verification_plateau(ligne, colonne):
     global l_c
     global grille_de_jeu
+    global nb_pieces_restantes
+    global nb_pieces_jouees
     #Verification par rapport à la grille du plateau
     if (ligne + 1) > l_c or (ligne) < 0:
         choix = False
@@ -263,7 +265,7 @@ def verification_plateau(ligne, colonne):
     elif (colonne + 1) > l_c or (colonne) < 0:
         choix = False
         c.itemconfigure(instruction, text = "Votre choix n'est pas valide, les pièces seraient en dehors du plateau !")
-    elif grille_de_jeu[ligne][colonne] != '-':
+    elif grille_de_jeu[ligne][colonne] != '-' and nb_pieces_restantes > nb_pieces_jouees:
         choix = False
         c.itemconfigure(instruction, text = "Votre choix n'est pas valide, les pièces se chevauchent !")
     else:
@@ -462,7 +464,7 @@ def partie_en_cours():
     global nb_pieces_restantes
     global espace_vide
 
-    prnt("")
+    print("")
     print("##################################################################")
     print("NOUVELLE PARTIE")
     print("")
