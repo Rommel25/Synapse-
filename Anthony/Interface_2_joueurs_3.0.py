@@ -122,16 +122,17 @@ def creation_plateau(canvas):
     global h_offset
     global l_c
 
+    couleur = "#7A4330"
 
     for i in range(1,l_c):
         #Création des lignes
         canvas.create_line(l_offset, h_offset+632-(632//l_c)*i,
                            l_offset+636, h_offset+632-(632//l_c)*i,
-                           width = 10-(nb_joueur-2)*2, fill = "#7A4330")
+                           width = 10-(nb_joueur-2)*2, fill = couleur)
         #Création des colonnes
         canvas.create_line(l_offset+632-(632//l_c)*i, h_offset,
                            l_offset+632-(632//l_c)*i, h_offset+636,
-                           width = 10-(nb_joueur-2)*2, fill = "#7A4330")
+                           width = 10-(nb_joueur-2)*2, fill = couleur)
 
 def affichage_joueur(nb_joueur, nom_joueur, score_joueur):
     global txt_score
@@ -538,22 +539,6 @@ img_FG = import_image("Fleche_gauche_1.png")
 img_chiffre = import_image("Chiffre_1.png") #Fond des chiffres du tableau de bord
 img_validation = import_image("Fond_validation.png")
 img_quitter = import_image("Fond_quitter.png")
-
-
-#Importation des pieces
-img_1H = import_image("Piece_1H.png")
-img_2H = import_image("Piece_2H.png")
-img_3H = import_image("Piece_3H.png")
-img_1B = import_image("Piece_1B.png")
-img_2B = import_image("Piece_2B.png")
-img_3B = import_image("Piece_3B.png")
-img_1D = import_image("Piece_1D.png")
-img_2D = import_image("Piece_2D.png")
-img_3D = import_image("Piece_3D.png")
-img_1G = import_image("Piece_1G.png")
-img_2G = import_image("Piece_2G.png")
-img_3G = import_image("Piece_3G.png")
-
 ###############################################################################
 #Panneau de jeu central
 #Placement des images
