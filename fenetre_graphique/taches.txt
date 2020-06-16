@@ -1,5 +1,5 @@
-  Fenêtre graphique de la partie en cours
-  Plateau de jeu
+Fenêtre graphique de la partie en cours
+Plateau de jeu
 Pièces sur le plateau
 Noms des joueurs
 Scores des joueurs
